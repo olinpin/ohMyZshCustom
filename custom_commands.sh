@@ -7,6 +7,7 @@ function gc() {
    git commit $1 $2 $3 $4
 }
 
+unalias gcm
 function gcm() {
     git commit -m $1 $2 $3 $4
 }
@@ -19,6 +20,7 @@ function gpl() {
     git pull $1 $2 $3 $4
 }
 
+unalias ga
 function ga() {
     git add ${VARIABLE:-.} $2 $3 $4
 }
@@ -27,6 +29,7 @@ function gch() {
     git checkout $1 $2 $3 $4
 }
 
+unalias gb
 function gb() {
     git branch $1 $2 $3 $4
 }
@@ -44,6 +47,7 @@ function gchtime() {
     git commit --amend --no-edit --date=${VARIABLE:-"now"}
 }
 
+unalias gbd
 function gbd() {
     git branch --merged >/tmp/merged-branches && vim /tmp/merged-branches && xargs git branch -d </tmp/merged-branches
 }
