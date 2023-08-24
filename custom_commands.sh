@@ -32,7 +32,7 @@ function gb() {
 }
 
 function gas() {
-    git add ${VARIABLE:-.} -- :!engerio/engerio/settings/local.py
+    git add --all 
     git status
 }
 
@@ -72,3 +72,35 @@ function vim() {
 function v() {
   nvim  $1 $2 $3 $4 $5 $6 $7 $8 $9
 }
+
+function dcu() {
+  od
+  docker-compose up --build $1 $2 $3 $4 $5 $6 $7 $8 $9 
+}
+
+function dcud () {
+  od
+  docker-compose up -d --build $1 $2 $3 $4 $5 $6 $7 $8 $9 
+}
+
+function od() {
+  PROCESS=docker
+  number=$(ps aux | grep -v grep | grep -ci $PROCESS)
+
+  if [ $number -lt 2 ]
+  then
+    open --background /Applications/Docker.app
+    echo "Openning Docker..."
+    while [ $(ps aux | grep -v grep | grep -ci $PROCESS) -lt 14 ]
+    do
+      sleep 1
+    done
+    sleep 6
+  fi
+}
+
+function rutvrm () {
+  docker-compose exec -T mysql mysql --host=mysql --password=deadbeef --database=vrm_testing < tests/resources/db/schema.sql
+  docker-compose exec -T mysql mysql --host=mysql --password=deadbeef --database=vrm_testing < tests/resources/db/seed.sql
+}
+
