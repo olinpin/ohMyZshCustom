@@ -108,3 +108,15 @@ function rutvrm () {
   docker-compose exec -T mysql mysql --host=mysql --password=deadbeef --database=vrm_testing < tests/resources/db/seed.sql
 }
 
+function cmpl() {
+  file=$1
+  result=${file%%.*}
+  gcc -ggdb -o $result $file
+}
+
+function cmple() {
+  file=$1
+  result=${file%%.*}
+  gcc -ggdb -o $result $file
+  ./$result
+}
