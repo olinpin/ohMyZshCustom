@@ -22,7 +22,7 @@ function gpl() {
 
 unalias ga
 function ga() {
-    git add ${VARIABLE:-.} $2 $3 $4
+    git add $1 $2 $3 $4
 }
 
 function gch() {
