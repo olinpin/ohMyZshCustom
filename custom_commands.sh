@@ -120,3 +120,19 @@ function cmple() {
   gcc -ggdb -o $result $file
   ./$result
 }
+
+function ccd() {
+  pwd | pbcopy
+}
+
+function tat() {
+  tmux attach -t $1
+}
+
+function t() {
+  tmux
+}
+
+function tls() {
+  tmux ls
+}
