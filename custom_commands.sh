@@ -133,8 +133,32 @@ function kfp() {
   sleep 2
   pause 'Press [Enter] key to stop the port forwards...'
   pkill -9 kubectl
+
+function cmpl() {
+  file=$1
+  result=${file%%.*}
+  gcc -ggdb -o $result $file
+}
+
+function cmple() {
+  file=$1
+  result=${file%%.*}
+  gcc -ggdb -o $result $file
+  ./$result
+}
+
+function ccd() {
+  pwd | pbcopy
 }
 
 function tat() {
   tmux attach -t $1
+}
+
+function t() {
+  tmux
+}
+
+function tls() {
+  tmux ls
 }
