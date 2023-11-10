@@ -91,7 +91,7 @@ function od() {
   PROCESS=docker
   number=$(ps aux | grep -v grep | grep -ci $PROCESS)
 
-  if [ $number -lt 2 ]
+  if [ $number -lt 14 ]
   then
     open --background /Applications/Docker.app
     echo "Openning Docker..."
@@ -99,7 +99,7 @@ function od() {
     do
       sleep 1
     done
-    sleep 6
+    sleep 3
   fi
 }
 
@@ -108,3 +108,33 @@ function rutvrm () {
   docker-compose exec -T mysql mysql --host=mysql --password=deadbeef --database=vrm_testing < tests/resources/db/seed.sql
 }
 
+function yas () {
+  yarn serve $1 $2 $3 $4 $5 $6 $7 $8 $9
+}
+
+function yai () {
+  yarn install $1 $2 $3 $4 $5 $6 $7 $8 $9
+}
+
+function cds() {
+  cd $1 && ls
+}
+
+function kfp() {
+  #!/bin/bash
+  function pause(){
+    echo "$*"
+    read
+  }
+
+  kubectl port-forward --namespace production svc/mysql-shared 3307:3306 &
+  kubectl port-forward --namespace acceptance svc/mysql-shared 3308:3306 &
+  kubectl port-forward --namespace dev svc/mysql-shared 3309:3306 &
+  sleep 2
+  pause 'Press [Enter] key to stop the port forwards...'
+  pkill -9 kubectl
+}
+
+function tat() {
+  tmux attach -t $1
+}
