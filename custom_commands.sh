@@ -1,46 +1,26 @@
 #!/bin/bash
-function gs() {
-   git status
-}
+alias gs="git status"
 
-function gc() {
-   git commit $1 $2 $3 $4
-}
+alias gc="git commit"
 
 unalias gcm 2>/dev/null
-function gcm() {
-    git commit -m $1 $2 $3 $4
-}
+alias gcm="git commit -m"
 
-function gps() {
-    git push $1 $2 $3 $4
-}
+alias gps="git push"
 
-function gpl() {
-    git pull $1 $2 $3 $4
-}
+alias gpl="git pull"
 
 unalias ga 2>/dev/null
-function ga() {
-    git add $1 $2 $3 $4
-}
+alias ga="git add"
 
-function gch() {
-    git checkout $1 $2 $3 $4
-}
-unalias gb 2>/dev/null
-function gb() {
-    git branch $1 $2 $3 $4
-}
+alias gch="git checkout"
 
 function gas() {
     git add --all 
     git status
 }
 
-function det() {
-    docker exec -it $1 $2 $3 $4
-}
+alias det="docker exec -it"
 
 function gchtime() {
     git commit --amend --no-edit --date=${VARIABLE:-"now"}
@@ -56,9 +36,7 @@ function grlcs() {
     git restore -S .
 }
 
-function grlc() {
-    git reset --soft HEAD^
-}
+alias grlc="git reset --soft HEAD^"
 
 function python() {
     python3 $1 $2 $3 $4 $5 $6 $7 $8 $9
@@ -107,17 +85,9 @@ function rutvrm () {
   docker-compose exec -T mysql mysql --host=mysql --password=deadbeef --database=vrm_testing < tests/resources/db/seed.sql
 }
 
-function yas () {
-  yarn serve $1 $2 $3 $4 $5 $6 $7 $8 $9
-}
+alias yas="yarn serve"
 
-function yai () {
-  yarn install $1 $2 $3 $4 $5 $6 $7 $8 $9
-}
-
-function cds() {
-  cd $1 && ls
-}
+alias yai="yarn install"
 
 function kfpa() {
   kubectl port-forward -n acceptance svc/victron-mysql-master 3306:3306
@@ -156,17 +126,11 @@ function ccd() {
   pwd | pbcopy
 }
 
-function tat() {
-  tmux attach -t $1
-}
+alias tat="tmux attach -t"
 
-function t() {
-  tmux
-}
+alias t="tmux"
 
-function tls() {
-  tmux ls
-}
+alias tls="tmux ls"
 
 function ip() {
   dig +short myip.opendns.com @resolver1.opendns.com
@@ -201,3 +165,85 @@ function dbar() {
   docker run $1
 }
 
+
+function cmr() {
+  if [[ "$*" == "--draft" ]]
+  then
+    draft="--draft"
+  else
+    draft=""
+  fi
+
+  if [[ $1 =~ .*",".* ]]; then 
+    reviewers=$1;
+  else
+    echo "Needs at least two reviewers, only assigned"
+    return
+  fi;
+
+  current_branch=$(git branch --show-current)
+  if [[ $current_branch == "master" ]] || [[  $current_branch == "beta" ]] || [[ $current_branch == "acceptance" ]] || [[ $current_branch == "main" ]] || [[ $current_branch == "release" ]] ;
+    then echo "Checkout a feature branch" && return;
+  fi;
+
+    # Check if 'main' branch exists in the remote repository
+  current_project=$(basename $(pwd))
+
+  if [[ ! -z $2 ]]; then
+    target_branch=$2
+  elif [[ $current_project =~ "vrm-(front|api)" ]]; then
+    target_branch="release"
+  else
+    target_branch="master"
+  fi
+
+  glab mr create -a oliver --reviewer=$reviewers --target-branch=$target_branch -t "Merge branch: '$(git branch --show-current)' into $target_branch" $draft
+}
+
+
+function branchname() {
+  if [[ -z $1 ]];
+  then
+    echo "No issue number supplied"
+  fi;
+  project=$(basename $(pwd))
+  issue_project=$(echo $project | sed 's/api/front/')
+  id=$1
+  if [[ -z $2 ]];
+  then
+    >&2 echo "No branch supplied, using issue title"
+    url="https://gitlab.elnino.tech/elnino/snooze/$issue_project/-/issues/$id"
+    title=$(glab issue view $url);
+    title=$(echo $title | sed -n '1 p' | sed 's/title://' | sed 's/^[[:space:]] *//g' | sed -e 's/ /-/g' | sed -e 's/\[//g' | sed -e 's/\]//g' )
+  fi;
+
+  if [[ ! -z $2 ]];
+  then 
+    branchname="$2"
+  else
+    branchname="$issue_project#$id-$title"
+  fi;
+  echo $branchname
+}
+
+
+function gbi() {
+  current_branch=$(git branch --show-current)
+  if [[ $current_branch != "master" ]];
+    then echo "Checkout master" && return;
+  fi;
+  if [[ -z $1 ]];
+  then
+    echo "No issue number supplied"
+    return 1
+  fi;
+
+  newbranch=$(branchname $1 $2)
+  git switch -c $newbranch
+}
+
+
+unalias gl 2>/dev/null
+alias gl="glab"
+
+alias glci="glab ci view"
