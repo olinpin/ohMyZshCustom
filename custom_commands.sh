@@ -326,6 +326,11 @@ function learning_time() {
     --url "https://app.paymoapp.com/api/entries?where=user_id=$USER_ID")
   LEARNING_TIME=$(jq "[.entries[] | select(.task_id==$LEARNING_ID) | .duration] | add" <<< "$INFO")
   TOTAL_TIME=$(jq "[.entries[] | .duration] | add" <<< "$INFO")
+  # check if user added a parameter
+  # if so, use it as total time in hours
+  if [ -n "$1" ]; then
+    TOTAL_TIME=$(echo "scale=2; $1 * 3600" | bc)
+  fi
   PERCENTAGE_LEARNING=$(echo "scale=2; 100 * $LEARNING_TIME / $TOTAL_TIME" | bc)
   LEARNING_TIME=$(echo "scale=2; $LEARNING_TIME / 3600" | bc)
   TOTAL_TIME=$(echo "scale=2; $TOTAL_TIME / 3600" | bc)
