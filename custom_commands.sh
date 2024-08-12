@@ -341,9 +341,9 @@ function learning_time() {
     echo -e "Percentage of time spent learning: ${GREEN}${PERCENTAGE_LEARNING}%${NC}"
   fi
   
-  if (( $(echo "$LEARNING_DIFF < 0" | bc -l) )); then
-    echo -e "Total learning time missing: ${RED}$LEARNING_DIFF hours${NC}"
+  if (( $(echo "$LEARNING_DIFF > 0" | bc -l) )); then
+    echo -e "Total learning time missing: ${GREEN}$LEARNING_DIFF hours${NC}"
   else
-    echo -e "Total extra learning time: ${GREEN}${LEARNING_DIFF#-} hours${NC}"
+    echo -e "Total extra learning time: ${RED}${LEARNING_DIFF#-} hours${NC}"
   fi
 }
