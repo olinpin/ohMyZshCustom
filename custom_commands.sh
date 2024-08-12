@@ -247,3 +247,103 @@ unalias gl 2>/dev/null
 alias gl="glab"
 
 alias glci="glab ci view"
+
+# get snippets from elnino gitlab
+function gitlab_snippets() {
+    SPACES=$(printf '%*s' 50)
+    if [ -z ${GITLAB_TOKEN+x} ]; then
+        echo "GITLAB_TOKEN is not set."; 
+    else
+        if [ -n "$1" ]; then
+            update_snippet $1;
+            return;
+        fi
+        SNIPPETS=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --url "https://gitlab.elnino.tech/api/v4/snippets")
+
+
+        echo " -------------------------------------------------- "
+        echo "| ID:     | Snippet name                           |"
+        echo "|---------|----------------------------------------|"
+        echo "$SNIPPETS" | tr -d '\n' | jq -r --arg spaces "$SPACES" '.[] |
+                                  [("| " + (.id | tostring) + "       ")[0:9], .title] |
+                                  join(" | ") |
+                                  if length > 50 then .[0:47] + "..." else . + $spaces end |
+                                  .[0:50] + " |"
+                                  '
+        echo " -------------------------------------------------- "
+    fi
+}
+
+function update_snippet() {
+    if [ -z "$1" ]; then
+        echo "Error: Missing snippet id";
+    else
+        # URL="https://gitlab.elnino.tech/api/v4/snippets/$1/raw"
+        URL="https://gitlab.elnino.tech/api/v4/snippets/$1"
+        # echo $URL
+        INFO=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --url $URL)
+
+        FILENAME=$(jq -r '.file_name' <<< $INFO)
+        FILEPATH="/tmp/$FILENAME"
+
+        curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --url "${URL}/raw" > $FILEPATH
+
+        TITLE=$(jq -r '.title' <<< $INFO)
+        DESC=$(jq -r '.description' <<< $INFO)
+        VISIBILITY=$(jq -r '.visibility' <<< $INFO)
+        nvim $FILEPATH
+        CONTENT=$(cat $FILEPATH)
+        JSON=$(jq -cn --arg content "$CONTENT" --arg title "$TITLE" --arg desc "$DESC" --arg filename "$FILENAME" --arg visibility "$VISIBILITY" '{title: $title, action: "update", file_name: $filename, visibility: $visibility, description: $desc, content: $content}')
+        response_code=$(curl -s -o /dev/null --request PUT $URL -w "%{http_code}" \
+         --header 'Content-Type: application/json' \
+         --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+         --data "$JSON")
+        if [ "$response_code" != "200" ]; then
+            echo "Error: Something went wrong, response code $response_code. Your changes have been saved to '$FILENAME'"
+            cp $FILEPATH $FILENAME
+        fi
+    fi
+
+}
+
+alias gls="gitlab_snippets"
+
+
+function learning_time() {
+  # ANSI color codes
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  CYAN='\033[0;36m'
+  NC='\033[0m' # No Color
+
+  USER_ID=300883
+  LEARNING_ID=21758966
+  INFO=$(curl --silent -u $PAYMO_TOKEN:f \
+    -H 'Accept: application/json' \
+    --url "https://app.paymoapp.com/api/entries?where=user_id=$USER_ID")
+  LEARNING_TIME=$(jq "[.entries[] | select(.task_id==$LEARNING_ID) | .duration] | add" <<< "$INFO")
+  TOTAL_TIME=$(jq "[.entries[] | .duration] | add" <<< "$INFO")
+  PERCENTAGE_LEARNING=$(echo "scale=2; 100 * $LEARNING_TIME / $TOTAL_TIME" | bc)
+  LEARNING_TIME=$(echo "scale=2; $LEARNING_TIME / 3600" | bc)
+  TOTAL_TIME=$(echo "scale=2; $TOTAL_TIME / 3600" | bc)
+  TOTAL_LEARNING_TIME=$(echo "scale=2; $TOTAL_TIME * 0.1" | bc)
+  LEARNING_DIFF=$(echo "scale=2; $TOTAL_LEARNING_TIME - $LEARNING_TIME" | bc)
+
+  echo -e "Total time spent: ${CYAN}$TOTAL_TIME hours${NC}"
+  echo -e "Total learning time should be: ${CYAN}$TOTAL_LEARNING_TIME hours${NC}"
+  echo -e "Total learning time spent: ${CYAN}$LEARNING_TIME hours${NC}"
+  if (( $(echo "$PERCENTAGE_LEARNING > 10" | bc -l) )); then
+    echo -e "Percentage of time spent learning: ${RED}${PERCENTAGE_LEARNING}%${NC}"
+  else
+    echo -e "Percentage of time spent learning: ${GREEN}${PERCENTAGE_LEARNING}%${NC}"
+  fi
+  
+  if (( $(echo "$LEARNING_DIFF < 0" | bc -l) )); then
+    echo -e "Total learning time missing: ${RED}$LEARNING_DIFF hours${NC}"
+  else
+    echo -e "Total extra learning time: ${GREEN}${LEARNING_DIFF#-} hours${NC}"
+  fi
+}
