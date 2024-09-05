@@ -5,6 +5,8 @@ fpath+=("$(brew --prefix)/share/zsh/site-functions")
 fpath+=$HOME/.zsh/pure
 
 autoload -U promptinit; promptinit
+# PURE_PROMPT_SYMBOL='❯'
+PURE_PROMPT_SYMBOL='(✿ ^‿^ )  ❯'
 prompt pure
 
 
@@ -13,6 +15,10 @@ export PATH=$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$PATH
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+
+export LC_ALL=en_EN.UTF-8
+export ANTHROPIC_API_KEY=
+export HOMEBREW_NO_AUTO_UPDATE=1
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -86,16 +92,12 @@ plugins=(
   yarn
   docker
   docker-compose
-  tmux
   zsh-autosuggestions
   zsh-z
   zsh-syntax-highlighting # Needs to be the last plugin
 )
 
 source $ZSH/oh-my-zsh.sh
-
-# User configuration
-source ~/.oh-my-zsh/custom/custom_commands.sh
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -126,5 +128,9 @@ source ~/.oh-my-zsh/custom/custom_commands.sh
 
 source /Users/oliverhnat/.docker/init-zsh.sh || true # Added by Docker Desktop
 
-# Fig post block. Keep at the bottom of this file.
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
+
+# User configuration
+source ~/.oh-my-zsh/custom/custom_commands.sh
+
+
+[ -f "/Users/oliverhnat/.ghcup/env" ] && . "/Users/oliverhnat/.ghcup/env" # ghcup-env
